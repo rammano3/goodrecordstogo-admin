@@ -1,30 +1,20 @@
-const _ = require('lodash');
-const Promise = require('bluebird');
-const Discogs = require('disconnect').Client;
-const parse = require('csv-parse/lib/sync');
-const stringify = require('csv-stringify/lib/sync');
 const slugify = require('slugify');
+const Discogs = require('disconnect').Client;
+const _ = require('lodash');
 
-export default async (inputCsv) => {
-  console.log('-SSSS', inputCsv);
-  // Authenticate by consumer key and secret
-  // TODO: env variables
+export async function handler(event, context) {
+  console.log('eeebbbb');
+  console.log(event.body, typeof event.body);
+  try {
+    const dis = new Discogs({
+      consumerKey: 'CCDUfPNAfvtEQfIzOKOb',
+      consumerSecret: 'NbwwDMaYhcnLVBXflAJGUKcBcsFHUgbp',
+    });
 
-  const dis = new Discogs({
-    consumerKey: 'CCDUfPNAfvtEQfIzOKOb',
-    consumerSecret: 'NbwwDMaYhcnLVBXflAJGUKcBcsFHUgbp',
-  }).setConfig({ mode: 'no-cors' });
+    const db = dis.database();
 
-  const db = dis.database();
+    const record = JSON.parse(event.body);
 
-  const records = parse(inputCsv, {
-    columns: true,
-    skip_empty_lines: true,
-  });
-
-  console.log(`Processing ${records.length} records`);
-
-  const newRecords = await Promise.mapSeries(records, async function (record) {
     let recordImage;
     const title = `${record.Artist} - ${record.Title}`;
     const release = await db
@@ -51,9 +41,7 @@ export default async (inputCsv) => {
     const barcode = (_.find(release.identifiers, { type: 'Barcode' }) || {})
       .value;
 
-    await Promise.delay(1000);
-
-    return {
+    const row = {
       Handle: slugify(title),
       Title: title,
       'Body (HTML)': tracklist,
@@ -102,60 +90,16 @@ export default async (inputCsv) => {
       'Variant Tax Code': null,
       'Cost per item': null,
     };
-  });
 
-  const data = stringify(newRecords, {
-    header: true,
-    columns: [
-      'Handle',
-      'Title',
-      'Body (HTML)',
-      'Vendor',
-      'Type',
-      'Tags',
-      'Published',
-      'Option1 Name',
-      'Option1 Value',
-      'Option2 Name',
-      'Option2 Value',
-      'Option3 Name',
-      'Option3 Value',
-      'Variant SKU',
-      'Variant Grams',
-      'Variant Inventory Tracker',
-      'Variant Inventory Qty',
-      'Variant Inventory Policy',
-      'Variant Fulfillment Service',
-      'Variant Price',
-      'Variant Compare At Price',
-      'Variant Requires Shipping',
-      'Variant Taxable',
-      'Variant Barcode',
-      'Image Src',
-      'Image Position',
-      'Image Alt Text',
-      'Gift Card',
-      'SEO Title',
-      'SEO Description',
-      'Google Shopping / Google Product Category',
-      'Google Shopping / Gender',
-      'Google Shopping / Age Group',
-      'Google Shopping / MPN',
-      'Google Shopping / AdWords Grouping',
-      'Google Shopping / AdWords Labels',
-      'Google Shopping / Condition',
-      'Google Shopping / Custom Product',
-      'Google Shopping / Custom Label 0',
-      'Google Shopping / Custom Label 1',
-      'Google Shopping / Custom Label 2',
-      'Google Shopping / Custom Label 3',
-      'Google Shopping / Custom Label 4',
-      'Variant Image',
-      'Variant Weight Unit',
-      'Variant Tax Code',
-      'Cost per item',
-    ],
-  });
-
-  return data;
-};
+    return {
+      statusCode: 200,
+      body: JSON.stringify(row),
+    };
+  } catch (err) {
+    console.log(err); // output to netlify function log
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ msg: err.message }), // Could be a custom message or object i.e. JSON.stringify(err)
+    };
+  }
+}
