@@ -1,35 +1,38 @@
-import React, { Component } from "react"
-import logo from "./logo.svg"
-import "./App.css"
+import React, { Component } from 'react';
 
-class LambdaDemo extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { loading: false, msg: null }
-  }
+import ProcessCSV from './pages/ProcessCSV';
 
-  handleClick = api => e => {
-    e.preventDefault()
+import logo from './logo.svg';
+import './App.css';
 
-    this.setState({ loading: true })
-    fetch("/.netlify/functions/" + api)
-      .then(response => response.json())
-      .then(json => this.setState({ loading: false, msg: json.msg }))
-  }
+// class LambdaDemo extends Component {
+//   constructor(props) {
+//     super(props)
+//     this.state = { loading: false, msg: null }
+//   }
 
-  render() {
-    const { loading, msg } = this.state
+//   handleClick = api => e => {
+//     e.preventDefault()
 
-    return (
-      <p>
-        <button onClick={this.handleClick("hello")}>{loading ? "Loading..." : "Call Lambda"}</button>
-        <button onClick={this.handleClick("async-dadjoke")}>{loading ? "Loading..." : "Call Async Lambda"}</button>
-        <br />
-        <span>{msg}</span>
-      </p>
-    )
-  }
-}
+//     this.setState({ loading: true })
+//     fetch("/.netlify/functions/" + api)
+//       .then(response => response.json())
+//       .then(json => this.setState({ loading: false, msg: json.msg }))
+//   }
+
+//   render() {
+//     const { loading, msg } = this.state
+
+//     return (
+//       <p>
+//         <button onClick={this.handleClick("hello")}>{loading ? "Loading..." : "Call Lambda"}</button>
+//         <button onClick={this.handleClick("async-dadjoke")}>{loading ? "Loading..." : "Call Async Lambda"}</button>
+//         <br />
+//         <span>{msg}</span>
+//       </p>
+//     )
+//   }
+// }
 
 class App extends Component {
   render() {
@@ -37,14 +40,15 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <LambdaDemo />
+          Expo App Link{' '}
+          <a href="https://expo.io/@rammano3/goodrecordstogo">
+            goodrecordstogo
+          </a>
+          <ProcessCSV />
         </header>
       </div>
-    )
+    );
   }
 }
 
-export default App
+export default App;
