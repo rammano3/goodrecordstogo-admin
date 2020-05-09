@@ -2,10 +2,9 @@ const slugify = require('slugify');
 const Discogs = require('disconnect').Client;
 const _ = require('lodash');
 
-export async function handler(event, context) {
-  console.log('eeebbbb');
-  console.log(event.body, typeof event.body);
+export async function handler(event) {
   try {
+    // TODO: ENV variables
     const dis = new Discogs({
       consumerKey: 'CCDUfPNAfvtEQfIzOKOb',
       consumerSecret: 'NbwwDMaYhcnLVBXflAJGUKcBcsFHUgbp',
@@ -20,7 +19,6 @@ export async function handler(event, context) {
     const release = await db
       .getRelease(record.release_id)
       .catch((e) => console.log('getRelease error', e));
-    console.log('processing', release.id);
 
     recordImage = _.get(release, 'images.0.uri');
 
@@ -99,7 +97,7 @@ export async function handler(event, context) {
     console.log(err); // output to netlify function log
     return {
       statusCode: 500,
-      body: JSON.stringify({ msg: err.message }), // Could be a custom message or object i.e. JSON.stringify(err)
+      body: JSON.stringify({ msg: err.message }),
     };
   }
 }

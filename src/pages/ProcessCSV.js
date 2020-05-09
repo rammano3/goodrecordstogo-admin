@@ -15,6 +15,7 @@ function downloadFile(fileName, urlData) {
 function ProcessCSV() {
   const [file, setFile] = useState();
   const [loading, setLoading] = useState(false);
+  const [isDone, setIsDone] = useState(false);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -29,9 +30,6 @@ function ProcessCSV() {
         columns: true,
         skip_empty_lines: true,
       });
-
-      console.log('records', records.length, records[0]);
-
       const newRecords = await Promise.mapSeries(records, async function (
         record
       ) {
@@ -47,7 +45,6 @@ function ProcessCSV() {
         );
 
         await Promise.delay(1000);
-
         return response.json();
       });
 
@@ -105,6 +102,7 @@ function ProcessCSV() {
       });
 
       setLoading(false);
+      setIsDone(true);
       downloadFile(
         `discog-shopify-${Date.now()}.csv`,
         'data:text/csv;charset=UTF-8,' + encodeURIComponent(data)
@@ -114,11 +112,20 @@ function ProcessCSV() {
   };
 
   return (
-    <div>
-      <h1>Upload CSV</h1>
-      <input type="file" name="file" onChange={handleFileChange} />
-      {loading && <div>loading...</div>}
-      {!loading && file && <button onClick={handleUpload}>Submit</button>}
+    <div style={{ marginTop: '32px' }}>
+      <h2>Upload CSV</h2>
+      {isDone && <div>Conversion Done, check your downloads</div>}
+      {!isDone && (
+        <div>
+          {!loading && (
+            <input type="file" name="file" onChange={handleFileChange} />
+          )}
+          {loading && <div class="lds-hourglass"></div>}
+          {!loading && file && (
+            <button onClick={handleUpload}>Convert CSV</button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
